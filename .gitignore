@@ -482,3 +482,8 @@ $RECYCLE.BIN/
 *.swp
 *.sqbpro
 *.sqbpro
+
+*.db
+*.db-shm
+*.db-wal
+*.sqbpro
