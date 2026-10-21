@@ -1,12 +1,13 @@
-﻿using TestingPlatform.Domain.Models;
-
+﻿using TestingPlatform.Application.Dtos;
 namespace TestingPlatform.Application.Interfaces;
 
 public interface IUserRepository
 {
-    List<User> GetAllAsync();
-    User GetByIdAsync(int id);
-    int CreateAsync(User user);
-    void UpdateAsync(User user);
-    void DeleteAsync(int id);
+    Task<IEnumerable<UserDto>> GetAllAsync();
+   
+    Task<UserDto> GetByIdAsync(int id);
+    
+    Task<int> CreateAsync(UserDto userDto);
+  
+    Task DeleteAsync(int id);
 }

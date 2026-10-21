@@ -1,94 +1,91 @@
-﻿using TestingPlatform.Application.Interfaces;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using TestingPlatform.Application.Dtos;
+using TestingPlatform.Application.Interfaces;
 using TestingPlatform.Domain.Models;
 using TestingPlatform.Infrastructure.Data;
-
 namespace TestingPlatform.Infrastructure.Repositories;
 
-public class GroupRepository(AppDbContext appDbContext) : IGroupRepository
+public class GroupRepository(AppDbContext appDbContext, IMapper mapper)
+: IGroupRepository
 {
-    public List<Group> GetAll()
+    public async Task<List<GroupDto>> GetAllAsync()
     {
-        var groups = appDbContext.Groups.ToList();
-
-        return groups;
+        var groups = await appDbContext.Groups
+        .Include(g => g.Project)
+        .Include(g => g.Direction)
+        .Include(g => g.Course)
+        .Include(g => g.Students)
+        .AsNoTracking()
+        .ToListAsync();
+        return mapper.Map<List<GroupDto>>(groups);
     }
-
-    public Group GetById(int id)
+    public async Task<GroupDto> GetByIdAsync(int id)
     {
-        var group = appDbContext.Groups.FirstOrDefault(g => g.Id == id);
-        if (group is null)
-            throw new Exception("Группа не найдена.");
-
-        return group;
-    }
-
-    public int Create(Group group)
-    {
-        var direction = appDbContext.Directions.Any(d => d.Id == group.DirectionId);
-        var course = appDbContext.Courses.Any(c => c.Id == group.CourseId);
-        var project = appDbContext.Projects.Any(p => p.Id == group.ProjectId);
-
-        if (!direction || !course || !project)
-            throw new Exception("Убедитесь, что DirectionId, CourseId и ProjectId существуют");
-
-        if (group.Students.Any())
-        {
-            var ids = group.Students.Select(s => s.Id).ToList();
-            var students = appDbContext.Students.Where(s => ids.Contains(s.Id)).ToList();
-            if (students.Count != ids.Count)
-                throw new Exception("Некоторые студенты не найдены");
-
-            group.Students = students;
-        }
-
-        var groupId = appDbContext.Add(group);
-        appDbContext.SaveChanges();
-
-        return groupId.Entity.Id;
-    }
-
-    public void Update(Group group)
-    {
-        var exists = appDbContext.Groups.FirstOrDefault(g => g.Id == group.Id);
-        if (exists is null)
-            throw new Exception("Группа не найдена");
-
-        var directionOk = appDbContext.Directions.Any(d => d.Id == group.DirectionId);
-        var courseOk = appDbContext.Courses.Any(c => c.Id == group.CourseId);
-        var projectOk = appDbContext.Projects.Any(p => p.Id == group.ProjectId);
-
-        if (!directionOk || !courseOk || !projectOk)
-            throw new Exception("Убедитесь, что DirectionId, CourseId и ProjectId существуют");
-
-        if (group.Students.Any())
-        {
-            var ids = group.Students.Select(s => s.Id).ToList();
-            var students = appDbContext.Students.Where(s => ids.Contains(s.Id)).ToList();
-            if (students.Count != ids.Count)
-                throw new Exception("Некоторые студенты не найдены");
-
-            exists.Students = group.Students;
-        }
-
-        exists.Name = group.Name;
-        exists.DirectionId = group.DirectionId;
-        exists.CourseId = group.CourseId;
-        exists.ProjectId = group.ProjectId;
-
-        appDbContext.SaveChanges();
-    }
-
-    public void Delete(int id)
-    {
-        var group = appDbContext.Groups.FirstOrDefault(group => group.Id == id);
-
+        var group = await appDbContext.Groups
+        .Include(g => g.Project)
+        .Include(g => g.Course)
+        .Include(g => g.Direction)
+        .AsNoTracking()
+        .FirstOrDefaultAsync(group => group.Id == id);
         if (group == null)
         {
             throw new Exception("Группа не найдена.");
         }
-
+        return mapper.Map<GroupDto>(group);
+    }
+    public async Task<int> CreateAsync(GroupDto groupDto)
+    {
+        var group = mapper.Map<Group>(groupDto);
+        var direction = await
+        appDbContext.Directions.FirstOrDefaultAsync(d => d.Id ==
+        groupDto.Direction.Id);
+        if (direction is null)
+        {
+            throw new Exception("Направление не найдено.");
+        }
+        group.Direction = direction;
+        var course = await appDbContext.Courses.FirstOrDefaultAsync(c =>
+        c.Id == groupDto.Course.Id);
+        if (course is null)
+        {
+            throw new Exception("Курс не найден.");
+        }
+        group.Course = course;
+        var project = await appDbContext.Projects.FirstOrDefaultAsync(p
+        => p.Id == groupDto.Project.Id);
+        if (project is null)
+        {
+            throw new Exception("Проект не найден.");
+        }
+        group.Project = project;
+        var groupId = await appDbContext.AddAsync(group);
+        await appDbContext.SaveChangesAsync();
+        return groupId.Entity.Id;
+    }
+    public async Task UpdateAsync(GroupDto groupDto)
+    {
+        var group = await appDbContext.Groups.FirstOrDefaultAsync(group
+        => group.Id == groupDto.Id);
+        if (group == null)
+        {
+            throw new Exception("Группа не найдена.");
+        }
+        group.Name = groupDto.Name;
+        group.CourseId = groupDto.Course.Id;
+        group.DirectionId = groupDto.Direction.Id;
+        group.ProjectId = groupDto.Project.Id;
+        await appDbContext.SaveChangesAsync();
+    }
+    public async Task DeleteAsync(int id)
+    {
+        var group = await appDbContext.Groups.FirstOrDefaultAsync(group
+        => group.Id == id);
+        if (group == null)
+        {
+            throw new Exception("Группа не найдена.");
+        }
         appDbContext.Groups.Remove(group);
-        appDbContext.SaveChanges();
+        await appDbContext.SaveChangesAsync();
     }
 }
-

@@ -1,15 +1,29 @@
 using Microsoft.EntityFrameworkCore;
 using TestingPlatform.Infrastructure.Data;
+using TestingPlatform.Application.Interfaces;
+using TestingPlatform.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+    )
+);
+
 builder.Services.AddControllers();
+
+builder.Services.AddAutoMapper(
+    cfg => cfg.AddMaps("TestingPlatform.Infrastructure")
+);
+
+builder.Services.AddAutoMapper(cfg => cfg.AddMaps("TestingPlatform"));
+builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(
-        builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IGroupRepository, GroupRepository>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 var app = builder.Build();
 
@@ -25,9 +39,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseAuthorization();
-
 app.MapControllers();
 
 app.Run();
