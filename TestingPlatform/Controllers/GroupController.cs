@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using practice.Responses.Group;
 using TestingPlatform.Application.Dtos;
 using TestingPlatform.Application.Interfaces;
+using TestingPlatform.Responses.Group;
+using TestingPlatform.Requests.Group;
 
-namespace practice.Controllers;
+namespace TestingPlatform.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

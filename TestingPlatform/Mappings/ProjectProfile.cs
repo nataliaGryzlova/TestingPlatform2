@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using TestingPlatform.Application.Dtos;
-using TestingPlatform2.Responses.Project;
-namespace practice.Mappings;
+using TestingPlatform.Responses.Project;
+namespace TestingPlatform.Mappings;
 
 public class ProjectProfile : Profile
 {

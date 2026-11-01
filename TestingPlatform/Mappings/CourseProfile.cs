@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using TestingPlatform.Application.Dtos;
-using TestingPlatform2.Responses.Course;
-namespace practice.Mappings;
+using TestingPlatform.Responses.Course;
+namespace TestingPlatform.Mappings;
 
 public class CourseProfile : Profile
 {

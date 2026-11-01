@@ -1,6 +1,6 @@
-﻿using practice.Responses;
+﻿using TestingPlatform.Responses;
 
-namespace TestingPlatform2.Responses.Direction
+namespace TestingPlatform.Responses.Direction
 {
     public class DirectionResponse : BaseResponse;
 }

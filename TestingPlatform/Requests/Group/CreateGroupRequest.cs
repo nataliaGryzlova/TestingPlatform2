@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+namespace TestingPlatform.Requests.Group;
+
 public class CreateGroupRequest
 {
     [Required]

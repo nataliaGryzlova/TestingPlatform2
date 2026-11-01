@@ -1,6 +1,6 @@
-﻿using practice.Responses;
+﻿using TestingPlatform.Responses;
 
-namespace TestingPlatform2.Responses.Course
+namespace TestingPlatform.Responses.Course
 {
     public class CourseResponse: BaseResponse;
 }

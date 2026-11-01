@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-namespace practice.Requests.Student;
+namespace TestingPlatform.Requests.Student;
 
 public class UpdateStudentRequest
 {

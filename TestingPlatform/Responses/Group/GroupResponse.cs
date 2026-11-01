@@ -1,8 +1,8 @@
-﻿using TestingPlatform2.Responses.Course;
-using TestingPlatform2.Responses.Direction;
-using TestingPlatform2.Responses.Project;
+﻿using TestingPlatform.Responses.Course;
+using TestingPlatform.Responses.Direction;
+using TestingPlatform.Responses.Project;
 
-namespace practice.Responses.Group;
+namespace TestingPlatform.Responses.Group;
 
 public class GroupResponse : BaseResponse
 {

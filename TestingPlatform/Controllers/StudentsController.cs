@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using practice.Requests.Student;
-using practice.Responses.Student;
 using TestingPlatform.Application.Dtos;
 using TestingPlatform.Application.Interfaces;
 using TestingPlatform.Domain.Enums;
+using TestingPlatform.Responses.Student;
+using TestingPlatform.Requests.Student;
+
 [ApiController]
 [Route("api/[controller]")]
 public class StudentsController(IStudentRepository studentRepository,

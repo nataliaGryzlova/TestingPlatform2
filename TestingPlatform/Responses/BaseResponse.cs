@@ -1,4 +1,4 @@
-﻿namespace practice.Responses;
+﻿namespace TestingPlatform.Responses;
 
 public class BaseResponse
 {

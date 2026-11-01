@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
-using practice.Requests.Student;
-using practice.Responses.Student;
+using TestingPlatform.Requests.Student;
+using TestingPlatform.Responses.Student;
 using TestingPlatform.Application.Dtos;
-namespace practice.Mappings;
+namespace TestingPlatform.Mappings;
 
 public class StudentProfile : Profile
 {

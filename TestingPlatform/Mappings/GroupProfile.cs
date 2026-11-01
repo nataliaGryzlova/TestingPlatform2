@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
-using practice.Responses.Group;
+using TestingPlatform.Responses.Group;
 using TestingPlatform.Application.Dtos;
-namespace practice.Mappings;
+using TestingPlatform.Requests.Group;
+
+namespace TestingPlatform.Mappings;
 
 public class GroupProfile : Profile
 {
