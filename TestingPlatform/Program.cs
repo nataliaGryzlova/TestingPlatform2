@@ -25,6 +25,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITestRepository, TestRepository>();
+builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
 
 var app = builder.Build();
 
