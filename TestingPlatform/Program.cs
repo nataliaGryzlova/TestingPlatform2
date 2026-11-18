@@ -16,7 +16,7 @@ builder.Services.AddControllers();
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddMaps("TestingPlatform.Infrastructure");
-    cfg.AddMaps("TestingPlatform");
+    cfg.AddMaps(typeof(Program).Assembly);
 });
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
 builder.Services.AddEndpointsApiExplorer();

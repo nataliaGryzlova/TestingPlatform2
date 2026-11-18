@@ -12,9 +12,15 @@ namespace TestingPlatform.Controllers;
 public class TestsController(ITestRepository testRepository, IMapper mapper) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetTests()
+    public async Task<IActionResult> GetTests(
+        [FromQuery] bool? isPublic,
+        [FromQuery] List<int>? groupIds,
+        [FromQuery] List<int>? studentIds)
     {
-        var tests = await testRepository.GetAllAsync();
+        var tests = await testRepository.GetAllAsync(
+            isPublic,
+            groupIds ?? new List<int>(),
+            studentIds ?? new List<int>());
 
         return Ok(mapper.Map<IEnumerable<TestResponse>>(tests));
     }

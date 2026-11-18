@@ -139,7 +139,7 @@ namespace TestingPlatform.Infrastructure.Migrations
                     b.Property<int?>("Score")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("StartedAt")
+                    b.Property<DateTime>("StartedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
@@ -147,7 +147,7 @@ namespace TestingPlatform.Infrastructure.Migrations
                     b.Property<int>("StudentId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset?>("SubmittedAt")
+                    b.Property<DateTime?>("SubmittedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("TestId")
@@ -385,12 +385,13 @@ namespace TestingPlatform.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<DateTimeOffset>("Deadline")
+                    b.Property<DateTime?>("Deadline")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Description")
@@ -416,7 +417,8 @@ namespace TestingPlatform.Infrastructure.Migrations
                     b.Property<int?>("PassingScore")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("PublishedAt")
+                    b.Property<DateTime?>("PublishedAt")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -468,7 +470,7 @@ namespace TestingPlatform.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("CreatedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");

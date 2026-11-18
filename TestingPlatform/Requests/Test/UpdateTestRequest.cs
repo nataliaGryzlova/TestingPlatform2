@@ -17,9 +17,9 @@ public class UpdateTestRequest
 
     public TestType Type { get; set; }
 
-    public DateTimeOffset PublishedAt { get; set; }
+    public DateTime PublishedAt { get; set; }
 
-    public DateTimeOffset Deadline { get; set; }
+    public DateTime Deadline { get; set; }
 
     public int? DurationMinutes { get; set; }
 
