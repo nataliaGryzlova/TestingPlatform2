@@ -116,7 +116,53 @@ public class TestRepository(AppDbContext appDbContext, IMapper mapper) : ITestRe
         await UpdateMembersTest(test, testDto);
 
         await appDbContext.SaveChangesAsync();
+
+        await UpdateMembersTest(test, testDto);
+
+        await appDbContext.SaveChangesAsync();
     }
+
+    private async Task RefreshPublicationStatusesAsync()
+    {
+        var now = DateTime.UtcNow;
+
+        var publishCandidates = await appDbContext.Tests
+            .AsNoTracking()
+            .Where(t => !t.IsPublic && (t.PublishedAt != null || t.Deadline != null))
+            .Select(t => new { t.Id, t.PublishedAt, t.Deadline })
+            .ToListAsync();
+
+        var toPublishIds = publishCandidates
+            .Where(x => x.PublishedAt != null
+                        && x.PublishedAt <= now
+                        && (x.Deadline == null || x.Deadline > now))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (toPublishIds.Count > 0)
+            await appDbContext.Tests
+                .Where(t => toPublishIds.Contains(t.Id))
+                .ExecuteUpdateAsync(s => s.SetProperty(t => t.IsPublic, true));
+
+        var unpublishCandidates = await appDbContext.Tests
+            .AsNoTracking()
+            .Where(t => t.IsPublic && (t.PublishedAt == null || t.Deadline != null))
+            .Select(t => new { t.Id, t.PublishedAt, t.Deadline })
+            .ToListAsync();
+
+        var toUnpublishIds = unpublishCandidates
+            .Where(x => x.PublishedAt == null
+                        || (x.Deadline != null && x.Deadline <= now))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (toUnpublishIds.Count > 0)
+            await appDbContext.Tests
+                .Where(t => toUnpublishIds.Contains(t.Id))
+                .ExecuteUpdateAsync(s => s.SetProperty(t => t.IsPublic, false));
+    }
+
+   
 
     public async Task DeleteAsync(int id)
     {
@@ -128,6 +174,73 @@ public class TestRepository(AppDbContext appDbContext, IMapper mapper) : ITestRe
         appDbContext.Tests.Remove(test);
 
         await appDbContext.SaveChangesAsync();
+    }
+
+    private async Task UpdateMembersTest(Test test, TestDto testDto)
+    {
+        var studentIds = testDto.Students?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
+        var groupIds = testDto.Groups?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
+        var courseIds = testDto.Courses?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
+        var directionIds = testDto.Directions?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
+        var projectIds = testDto.Projects?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
+
+        if (appDbContext.Entry(test).State == EntityState.Detached)
+            appDbContext.Attach(test);
+
+        await appDbContext.Entry(test).Collection(t => t.Students).LoadAsync();
+        test.Students.Clear();
+        if (studentIds.Length > 0)
+        {
+            var students = await appDbContext.Students
+                .Where(s => studentIds.Contains(s.Id))
+                .ToListAsync();
+            foreach (var s in students)
+                test.Students.Add(s);
+        }
+
+        await appDbContext.Entry(test).Collection(t => t.Groups).LoadAsync();
+        test.Groups.Clear();
+        if (groupIds.Length > 0)
+        {
+            var groups = await appDbContext.Groups
+                .Where(g => groupIds.Contains(g.Id))
+                .ToListAsync();
+            foreach (var g in groups)
+                test.Groups.Add(g);
+        }
+
+        await appDbContext.Entry(test).Collection(t => t.Courses).LoadAsync();
+        test.Courses.Clear();
+        if (courseIds.Length > 0)
+        {
+            var courses = await appDbContext.Courses
+                .Where(c => courseIds.Contains(c.Id))
+                .ToListAsync();
+            foreach (var c in courses)
+                test.Courses.Add(c);
+        }
+
+        await appDbContext.Entry(test).Collection(t => t.Directions).LoadAsync();
+        test.Directions.Clear();
+        if (directionIds.Length > 0)
+        {
+            var directions = await appDbContext.Directions
+                .Where(d => directionIds.Contains(d.Id))
+                .ToListAsync();
+            foreach (var d in directions)
+                test.Directions.Add(d);
+        }
+
+        await appDbContext.Entry(test).Collection(t => t.Projects).LoadAsync();
+        test.Projects.Clear();
+        if (projectIds.Length > 0)
+        {
+            var projects = await appDbContext.Projects
+                .Where(p => projectIds.Contains(p.Id))
+                .ToListAsync();
+            foreach (var p in projects)
+                test.Projects.Add(p);
+        }
     }
 
     public async Task<IEnumerable<object>> GetTestCountByTypeAsync()
@@ -212,109 +325,5 @@ public class TestRepository(AppDbContext appDbContext, IMapper mapper) : ITestRe
             .OrderByDescending(x => x.TestCount)
             .Take(top)
             .ToListAsync();
-    }
-    private async Task RefreshPublicationStatusesAsync()
-    {
-        var now = DateTime.UtcNow;
-
-        var publishCandidates = await appDbContext.Tests
-            .AsNoTracking()
-            .Where(t => !t.IsPublic && (t.PublishedAt != null || t.Deadline != null))
-            .Select(t => new { t.Id, t.PublishedAt, t.Deadline })
-            .ToListAsync();
-
-        var toPublishIds = publishCandidates
-            .Where(x => x.PublishedAt != null
-                        && x.PublishedAt <= now
-                        && (x.Deadline == null || x.Deadline > now))
-            .Select(x => x.Id)
-            .ToList();
-
-        if (toPublishIds.Count > 0)
-            await appDbContext.Tests
-                .Where(t => toPublishIds.Contains(t.Id))
-                .ExecuteUpdateAsync(s => s.SetProperty(t => t.IsPublic, true));
-
-        var unpublishCandidates = await appDbContext.Tests
-            .AsNoTracking()
-            .Where(t => t.IsPublic && (t.PublishedAt == null || t.Deadline != null))
-            .Select(t => new { t.Id, t.PublishedAt, t.Deadline })
-            .ToListAsync();
-
-        var toUnpublishIds = unpublishCandidates
-            .Where(x => x.PublishedAt == null
-                        || (x.Deadline != null && x.Deadline <= now))
-            .Select(x => x.Id)
-            .ToList();
-
-        if (toUnpublishIds.Count > 0)
-            await appDbContext.Tests
-                .Where(t => toUnpublishIds.Contains(t.Id))
-                .ExecuteUpdateAsync(s => s.SetProperty(t => t.IsPublic, false));
-    }
-
-    private async Task UpdateMembersTest(Test test, TestDto testDto)
-    {
-        var studentIds = testDto.Students?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
-        var groupIds = testDto.Groups?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
-        var courseIds = testDto.Courses?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
-        var directionIds = testDto.Directions?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
-        var projectIds = testDto.Projects?.Select(x => x.Id).Where(id => id > 0).Distinct().ToArray() ?? Array.Empty<int>();
-
-        if (appDbContext.Entry(test).State == EntityState.Detached)
-            appDbContext.Attach(test);
-
-        await appDbContext.Entry(test).Collection(t => t.Students).LoadAsync();
-        test.Students.Clear();
-        if (studentIds.Length > 0)
-        {
-            var students = await appDbContext.Students.Where(s => studentIds.Contains(s.Id)).ToListAsync();
-            foreach (var s in students) test.Students.Add(s);
-        }
-
-        await appDbContext.Entry(test).Collection(t => t.Groups).LoadAsync();
-        test.Groups.Clear();
-        if (groupIds.Length > 0)
-        {
-            var groups = await appDbContext.Groups.Where(g => groupIds.Contains(g.Id)).ToListAsync();
-            foreach (var g in groups) test.Groups.Add(g);
-        }
-
-        await appDbContext.Entry(test).Collection(t => t.Courses).LoadAsync();
-        test.Courses.Clear();
-        if (courseIds.Length > 0)
-        {
-            var courses = await appDbContext.Courses.Where(c => courseIds.Contains(c.Id)).ToListAsync();
-            foreach (var c in courses) test.Courses.Add(c);
-        }
-
-        await appDbContext.Entry(test).Collection(t => t.Directions).LoadAsync();
-        test.Directions.Clear();
-        if (directionIds.Length > 0)
-        {
-            var directions = await appDbContext.Directions.Where(d => directionIds.Contains(d.Id)).ToListAsync();
-            foreach (var d in directions) test.Directions.Add(d);
-        }
-
-        await appDbContext.Entry(test).Collection(t => t.Projects).LoadAsync();
-        test.Projects.Clear();
-        if (projectIds.Length > 0)
-        {
-            var projects = await appDbContext.Projects.Where(p => projectIds.Contains(p.Id)).ToListAsync();
-            foreach (var p in projects) test.Projects.Add(p);
-        }
-
-        await appDbContext.Entry(test).Collection(t => t.Projects).LoadAsync();
-        test.Projects.Clear();
-
-        if (projectIds.Length > 0)
-        {
-            var projects = await appDbContext.Projects
-                .Where(p => projectIds.Contains(p.Id))
-                .ToListAsync();
-
-            foreach (var p in projects)
-                test.Projects.Add(p);
-        }
     }
 }
