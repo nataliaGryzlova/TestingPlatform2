@@ -1,31 +1,55 @@
-﻿//using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using TestingPlatform.Application.Dtos;
+using TestingPlatform.Application.Interfaces;
+using TestingPlatform.Requests.Question;
+using TestingPlatform.Responses.Question;
 
-//    namespace TestingPlatform.Controllers;
+namespace TestingPlatform.Controllers;
 
-//    [ApiController]
-//    [Route("api/[controller]")]
-//    public class QuestionsController : ControllerBase
-//    {
-//        [HttpGet]
-//        public IActionResult GetAllQuestions() => Ok("Список всех вопросов");
+[ApiController]
+[Route("api/[controller]")]
+public class QuestionsController(IQuestionRepository questionRepository, IMapper mapper) : ControllerBase
+{
+    [HttpGet]
+    public async Task<IActionResult> GetAllQuestions()
+    {
+        var questions = await questionRepository.GetAllAsync();
 
-//        [HttpGet("{id}")]
-//        public IActionResult GetQuestionById(int id)
-//        {
-//            if (id == 1) return Ok("Вопрос 1");
-//            return NotFound();
-//        }
+        return Ok(mapper.Map<IEnumerable<QuestionResponse>>(questions));
+    }
 
-//        [HttpGet("by-test/{testId}")]
-//        public IActionResult GetQuestionsByTestId(int testId) => Ok($"Вопросы для теста {testId}");
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> GetQuestionById(int id)
+    {
+        var question = await questionRepository.GetByIdAsync(id);
 
-//        [HttpPost]
-//        public IActionResult CreateQuestion() => Created("/api/questions/1", "Вопрос создан");
+        return Ok(mapper.Map<QuestionResponse>(question));
+    }
 
-//        [HttpPut("{id}")]
-//        public IActionResult UpdateQuestion(int id) => NoContent();
+    [HttpPost]
+    public async Task<IActionResult> CreateQuestion([FromBody] CreateQuestionRequest request)
+    {
+        var id = await questionRepository.CreateAsync(mapper.Map<QuestionDto>(request));
 
-//        [HttpDelete("{id}")]
-//        public IActionResult DeleteQuestion(int id) => NoContent();
-//    }
+        return StatusCode(StatusCodes.Status201Created, new { Id = id });
+    }
 
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> UpdateQuestion(int id, [FromBody] UpdateQuestionRequest request)
+    {
+        request.Id = id;
+
+        await questionRepository.UpdateAsync(mapper.Map<QuestionDto>(request));
+
+        return NoContent();
+    }
+
+    [HttpDelete("{id:int}")]
+    public async Task<IActionResult> DeleteQuestion(int id)
+    {
+        await questionRepository.DeleteAsync(id);
+
+        return NoContent();
+    }
+}

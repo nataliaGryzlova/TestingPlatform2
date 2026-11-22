@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using TestingPlatform.Application.Dtos;
+using TestingPlatform.Infrastructure.Exceptions;
 using TestingPlatform.Application.Interfaces;
 using TestingPlatform.Domain.Models;
 using TestingPlatform.Infrastructure.Data;
@@ -30,7 +31,7 @@ public class GroupRepository(AppDbContext appDbContext, IMapper mapper)
         .FirstOrDefaultAsync(group => group.Id == id);
         if (group == null)
         {
-            throw new Exception("Группа не найдена.");
+            throw new EntityNotFoundException("Группа не найдена.");
         }
         return mapper.Map<GroupDto>(group);
     }
@@ -42,21 +43,21 @@ public class GroupRepository(AppDbContext appDbContext, IMapper mapper)
         groupDto.Direction.Id);
         if (direction is null)
         {
-            throw new Exception("Направление не найдено.");
+            throw new EntityNotFoundException("Направление не найдено.");
         }
         group.Direction = direction;
         var course = await appDbContext.Courses.FirstOrDefaultAsync(c =>
         c.Id == groupDto.Course.Id);
         if (course is null)
         {
-            throw new Exception("Курс не найден.");
+            throw new EntityNotFoundException("Курс не найден.");
         }
         group.Course = course;
         var project = await appDbContext.Projects.FirstOrDefaultAsync(p
         => p.Id == groupDto.Project.Id);
         if (project is null)
         {
-            throw new Exception("Проект не найден.");
+            throw new EntityNotFoundException("Проект не найден.");
         }
         group.Project = project;
         var groupId = await appDbContext.AddAsync(group);
@@ -69,7 +70,7 @@ public class GroupRepository(AppDbContext appDbContext, IMapper mapper)
         => group.Id == groupDto.Id);
         if (group == null)
         {
-            throw new Exception("Группа не найдена.");
+            throw new EntityNotFoundException("Группа не найдена.");
         }
         group.Name = groupDto.Name;
         group.CourseId = groupDto.Course.Id;
@@ -83,7 +84,7 @@ public class GroupRepository(AppDbContext appDbContext, IMapper mapper)
         => group.Id == id);
         if (group == null)
         {
-            throw new Exception("Группа не найдена.");
+            throw new EntityNotFoundException("Группа не найдена.");
         }
         appDbContext.Groups.Remove(group);
         await appDbContext.SaveChangesAsync();

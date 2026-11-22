@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using TestingPlatform.Application.Dtos;
 using TestingPlatform.Application.Interfaces;
+using TestingPlatform.Infrastructure.Exceptions;
 using TestingPlatform.Domain.Models;
 using TestingPlatform.Infrastructure.Data;
 namespace TestingPlatform.Infrastructure.Repositories;
@@ -25,7 +26,7 @@ mapper) : IStudentRepository
         .FirstOrDefaultAsync(student => student.Id == id);
         if (student == null)
         {
-            throw new Exception("Студент не найден.");
+            throw new EntityNotFoundException("Студент не найден.");
         }
         return mapper.Map<StudentDto>(student);
     }
@@ -43,7 +44,7 @@ mapper) : IStudentRepository
         studentDto.Id);
         if (student == null)
         {
-            throw new Exception("Студент не найден.");
+            throw new EntityNotFoundException("Студент не найден.");
         }
         student.Phone = studentDto.Phone;
         student.VkProfileLink = studentDto.VkProfileLink;
@@ -56,7 +57,7 @@ mapper) : IStudentRepository
         .FirstOrDefaultAsync(s => s.Id == id);
         if (student == null)
         {
-            throw new Exception("Студент не найден.");
+            throw new EntityNotFoundException("Студент не найден.");
         }
         appDbContext.Users.Remove(student.User);
         await appDbContext.SaveChangesAsync();

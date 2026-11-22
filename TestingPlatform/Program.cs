@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using TestingPlatform.Middlewares;
 using TestingPlatform.Infrastructure.Data;
 using TestingPlatform.Application.Interfaces;
 using TestingPlatform.Infrastructure.Repositories;
@@ -26,6 +27,7 @@ builder.Services.AddScoped<IGroupRepository, GroupRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ITestRepository, TestRepository>();
 builder.Services.AddScoped<IAnswerRepository, AnswerRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
 var app = builder.Build();
 
@@ -41,7 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseAuthorization();
 app.MapControllers();
-
 app.Run();
