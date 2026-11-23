@@ -1,10 +1,22 @@
 using Microsoft.EntityFrameworkCore;
 using TestingPlatform.Middlewares;
+using Serilog;
+using Serilog.Formatting.Json;
 using TestingPlatform.Infrastructure.Data;
 using TestingPlatform.Application.Interfaces;
 using TestingPlatform.Infrastructure.Repositories;
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        formatter: new JsonFormatter(),
+        path: "logs/structured-.json")
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(

@@ -2,7 +2,7 @@
 
 namespace TestingPlatform.Middlewares;
 
-public class ExceptionMiddleware(RequestDelegate next)
+public class ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
 {
     public async Task InvokeAsync(HttpContext httpContext)
     {
@@ -12,6 +12,7 @@ public class ExceptionMiddleware(RequestDelegate next)
         }
         catch (Exception exception)
         {
+            logger.LogError(exception, "Exception: {Message}", exception.Message);
             var errorCodeResponse = exception switch
             {
                 InvalidOperationException exc => new CodeAndMessage(StatusCodes.Status400BadRequest, exc.Message),
