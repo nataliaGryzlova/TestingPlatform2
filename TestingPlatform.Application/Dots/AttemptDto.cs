@@ -1,0 +1,17 @@
+﻿namespace TestingPlatform.Application.Dtos;
+
+public class AttemptDto
+{
+    
+    public int Id { get; set; }
+   
+    public DateTime StartedAt { get; set; }
+ 
+    public DateTime? SubmittedAt { get; set; }
+
+    public int? Score { get; set; }
+ 
+    public int TestId { get; set; }
+   
+    public int StudentId { get; set; }
+}

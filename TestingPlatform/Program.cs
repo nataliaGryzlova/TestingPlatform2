@@ -7,12 +7,13 @@ using TestingPlatform.Application.Interfaces;
 using TestingPlatform.Infrastructure.Repositories;
 
 Log.Logger = new LoggerConfiguration()
-    .MinimumLevel.Information()
-    .WriteTo.Console()
-    .WriteTo.File(
-        formatter: new JsonFormatter(),
-        path: "logs/structured-.json")
-    .CreateLogger();
+.MinimumLevel.Information()
+.WriteTo.Console()
+.WriteTo.File(
+formatter: new JsonFormatter(),
+path: "logs/structured-.json")
+.WriteTo.SQLite("logs/logs.db")
+.CreateLogger();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,7 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddMaps(typeof(Program).Assembly);
 });
 builder.Services.AddScoped<IStudentRepository, StudentRepository>();
+builder.Services.AddScoped<IAttemptRepository, AttemptRepository>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
